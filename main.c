@@ -90,12 +90,20 @@ void handle_orientation(enum Orientation orientation) {
     // transform display
     system_fmt("hyprctl keyword monitor %s,transform,%d", output, orientation);
 
-    // transform touch devices
+    // only transform touch devices
     // (and pray that our lord and savior vaxry won't change hyprctl output)
     system_fmt("while IFS=$'\n' read -r device ; do "
             "hyprctl keyword device:\"$device\":transform %d; "
-            "done <<< \"$(hyprctl devices | awk '/Touch Device at|Tablet at/ {getline;print $1}')\"",
+            "done <<< \"$(hyprctl devices | awk '/Touch Device at/ {getline;print $1}')\"",
             orientation);
+
+    // just only transform stylus for GPD POCKET 3 stylus
+    if (orientation > 3) stylus_orientation += 2;
+    else stylus_orientation =0;
+    system_fmt("while IFS=$'\n' read -r device ; do "
+            "hyprctl keyword device:\"$device\":transform %d; "
+            "done <<< \"$(hyprctl devices | awk '/Tablet at|stylus/ {getline;print $1}')\"",
+            stylus_orientation);
 }
 
 DBusMessage* request_orientation(DBusConnection* conn) {

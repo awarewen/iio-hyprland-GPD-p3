@@ -86,6 +86,7 @@ void system_fmt(char* format, ...) {
 void handle_orientation(enum Orientation orientation) {
     if (orientation == Undefined)
         return;
+    int stylus_orientation = orientation;
 
     // transform display
     system_fmt("hyprctl keyword monitor %s,transform,%d", output, orientation);
@@ -93,15 +94,15 @@ void handle_orientation(enum Orientation orientation) {
     // only transform touch devices
     // (and pray that our lord and savior vaxry won't change hyprctl output)
     system_fmt("while IFS=$'\n' read -r device ; do "
-            "hyprctl keyword device:\"$device\":transform %d; "
+            "hyprctl keyword input:touchdevice:transform %d; "
             "done <<< \"$(hyprctl devices | awk '/Touch Device at/ {getline;print $1}')\"",
             orientation);
 
     // just only transform stylus for GPD POCKET 3 stylus
-    if (orientation > 3) stylus_orientation += 2;
-    else stylus_orientation =0;
+   // if (orientation > 3) stylus_orientation += 2;
+  //  else stylus_orientation =0;
     system_fmt("while IFS=$'\n' read -r device ; do "
-            "hyprctl keyword device:\"$device\":transform %d; "
+            "hyprctl keyword input:tablet:transform %d; "
             "done <<< \"$(hyprctl devices | awk '/Tablet at|stylus/ {getline;print $1}')\"",
             stylus_orientation);
 }
